@@ -1,0 +1,12 @@
+Checkers AI
+(Andrew, Alejandro,Angaar)
+	As a group we have decided that we would like to create a checkers game with a competitive agent. We chose checkers over any other game such as tic tac tok because checkers can benefit the user. It teaches patience, boosts memory and it teaches people how to make good judgment calls. In this checkers game, the AI will be able to play checkers with the user that is conducting the game. This AI will be able to compete with the user acting like another user. It will try to make the most effective move in order to beat the user. The more games the AI plays, the most effective it becomes. It will learn from previous mistakes and make sure that it makes a move differently if presented with the same scenario in another match.
+	
+We will be using Python as our programming language since we are all familiar with it. We believe that we can build this program more effectively since it's less complex than other languages such as C++. 
+	
+We do not need Datasets for our AI.
+	
+Personally we do not have existing code for an AI Checkers program but many people have created their own personal program. With the knowledge of some top level checkers players, computer scientists used the heuristics algorithm to capture successful and unsuccessful moves in a checkers game. Schaeffer and some of his colleagues built a computer program that has been undefeated. This program has only tied once but has never lost. They name the AI Chinook. They programmed Chinook to exploit the superior processing and memory capabilities of computers to calculate the best way to incorporate AI principals in order to be successful at checkers. It lost only one time in a championship game with a human but went on to be the first computer program to beat a human in a championship game years later.
+	We are going to implement the Alpha Beta pruning algorithm. Alpha Beta Pruning is an optimization technique from the MinMax algorithm that can reduce the number of node extensions to get a better search result. We chose Alpha Beta Pruning because it searches for the best steps to take fast and efficiently.
+	We have already started to implement the program in Python. We are still trying to get the Checkers game to work by itself. As soon as we are done implementing the Checkers game, We will start to create the AI. Our Program should be done by Mid next week, giving us a couple of days to test the program and make any tweaks to it.
+	
