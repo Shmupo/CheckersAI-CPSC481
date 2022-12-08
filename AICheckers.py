@@ -1,3 +1,13 @@
+# TODO
+# jumps, aka way to eliminate pieces
+# some move verification on the player side
+# executing moves
+# what to do when checkers piece reaches the end of the other side?
+# somehow allow piece to jump backwards to eliminate opponents
+# allow chaining of jumps
+# entire AI not done
+
+
 class Checkers:
     game_board = [['_', 'B', '_', 'B', '_', 'B', '_', 'B'], #0
                   ['B', '_', 'B', '_', 'B', '_', 'B', '_'],#1
@@ -8,11 +18,16 @@ class Checkers:
                   ['_', 'W', '_', 'W', '_', 'W', '_', 'W'], #6
                   ['W', '_', 'W', '_', 'W', '_', 'W', '_']] #7
 
-    def __init__(self):
+    def __init__(self, player):
         self.turn = 'B'
         # stores all of the current moves of each piece on the board
         self.white_moves = {}
         self.black_moves = {}
+        self.running = True
+        self.player = player
+        self.player_color = player.color
+        # need to set this after Checkers() is made of the first time
+        self.ai = None
 
     # pos : (y, x)
     # returns open position in direction
@@ -75,7 +90,7 @@ class Checkers:
         print('Available moves : ')
         for x, y in moves_list.keys():
             print('Piece : (', y, x, ')', end=' | ')
-            print('Moves : (', moves_list[(x, y)], moves_list[(x, y)])
+            print('Moves : (', moves_list[(x, y)], moves_list[(x, y)], ')')
 
     # returns the valid moves at a position (y, x)
     def moves_of_piece(self, pos):
@@ -109,10 +124,16 @@ class Checkers:
                     #if piece in self.black_moves: del self.black_moves[y, x]
                     pass
 
-    # x_dir is either 'L' or 'R' -> left or right
-    # y_dire is either 'U' or 'D' -> up or down
-    # piece_pos is the position of the piece to move : (x, y)
-    def try_move(self, piece_pos, x_dir, y_dir):
+    # return true if move is valid
+    def try_move(self, piece, move, color):
+        if color == 'W' : move_list = self.white_moves
+        elif color == 'B' : move_list = self.black_moves
+
+        if piece in move_list:
+            pass
+
+    # executes a move
+    def make_move(self, piece, move):
         pass
 
     # returns True if game is won
@@ -122,49 +143,90 @@ class Checkers:
             for element in row:
                 if element != 0 and color == None: color = element
                 elif color != None and color != element: return False
-        else: return True
+
+    # only call this to run the game
+    def run(self):
+        while self.running:
+            self.print_board()
+            self.update_moves()
+            self.print_moves(self.player_color)
+            
+            pos = self.player.get_piece()
+            print(pos, ' selected.')
+            to_pos = self.player.get_move()
+            
+            valid = self.try_move(pos, to_pos, self.player_color)
+            if valid: self.make_move(pos, to_pos)
+            print('Moved ', pos, 'to', to_pos)
+
+            input('Press enter to end turn...')
 
 
+
+# mostly handles input from player
 class CheckersPlayer:
-    def __init__(self, player_name, color, checkers_game):
+    def __init__(self, player_name, color):
         self.name = player_name
         self.color = color
-        self.checkers = checkers_game
+
+    # prompt player to select piece
+    def get_piece(self):
+        while True:
+            pos = input('Enter the position, x,y of a piece to move : ')
+            try:
+                pos = pos.split(",")
+                output = (int(pos[0]), int(pos[1]))
+                return output
+            except:
+                print('Invalid input, try again.')
+
+    # prompt player to select square to move to
+    def get_move(self):
+        while True:
+            pos = input('Enter the position, x,y of a square to move to : ')
+            try:
+                pos = pos.split(",")
+                output = (int(pos[0]), int(pos[1]))
+                return output
+            except:
+                print('Invalid input, try again.')
+
+
+class CheckersAI(CheckersPlayer):
+    def __init__(self, name, color, checkers):
+        self.super().init(name, color)
+        self.checkers = checkers
         self.game_board = self.checkers.game_board
+        self.white_moves = checkers.white_moves
+        self.black_moves = checkers.black_moves
 
-    def prompt_player(self):
-        not_valid_piece = False
-        
-
-
-
-class CheckersAssistant(CheckersPlayer):
-    def __init__(self, color):
-        self.color = color
+        self.action = None
 
     # suggests the best move to make
-    def suggest_move(self, piece):
+    def get_move(self):
+        pass
+
+    def get_piece(self):
         pass
 
     # returns a value of how good a move is
-    def est_move_value(self, move):
+    def generate_tree(self):
         pass
 
     # calculates the best move for a piece
-    def calc_best_move(self, piece):
-        pass
-
-    # get the pieces on the board
-    def get_board_pieces(self, board):
+    def generate_move(self):
         pass
 
 
 def main():
-    checkers = Checkers()
+    player1 = CheckersPlayer('Human', 'W')
+    checkers = Checkers(player1)
+    # need to pass the game to the AI so that it may access the game board and available moves
+    checkers_ai = CheckersAI('Computer', 'B', checkers)
+    # put the AI back into checkers
+    checkers.ai = checkers_ai
 
-    checkers.print_board()
-    checkers.update_moves()
-    checkers.print_moves('W')
+    checkers.run()
     
 
 if __name__ == '__main__':
