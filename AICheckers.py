@@ -194,7 +194,7 @@ class CheckersPlayer:
 
 class CheckersAI(CheckersPlayer):
     def __init__(self, name, color, checkers):
-        self.super().init(name, color)
+        super().__init__(name, color)
         self.checkers = checkers
         self.game_board = self.checkers.game_board
         self.white_moves = checkers.white_moves
