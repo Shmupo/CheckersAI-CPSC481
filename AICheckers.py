@@ -18,16 +18,15 @@ class Checkers:
                   ['_', 'W', '_', 'W', '_', 'W', '_', 'W'], #6
                   ['W', '_', 'W', '_', 'W', '_', 'W', '_']] #7
 
-    def __init__(self, player):
+    def __init__(self, player, player2):
         self.turn = 'B'
         # stores all of the current moves of each piece on the board
         self.white_moves = {}
         self.black_moves = {}
         self.running = True
-        self.player = player
-        self.player_color = player.color
-        # need to set this after Checkers() is made of the first time
-        self.ai = None
+        self.player1 = player
+        self.player2 = player2
+        self.current_turn = 'W'
 
     # pos : (y, x)
     # returns open position in direction
@@ -72,7 +71,7 @@ class Checkers:
             elif self.game_board[pos[0] - 1][pos[1] - 1] != self.game_board[pos[0]][pos[1]]:
                 if pos[0] > 1 and pos[1] > 1:
                     if self.game_board[pos[0] - 2][pos[1] - 2] == '_':
-                        return ( pos[1] - 2, pos[0] - 2)
+                        return (pos[0] - 2, pos[1] - 2, )
                 else: return None
         else: return None
 
@@ -130,11 +129,19 @@ class Checkers:
         elif color == 'B' : move_list = self.black_moves
 
         if piece in move_list:
-            pass
+            if move in move_list[piece]: return True
+            else: return False
+        else: return False
 
     # executes a move
-    def make_move(self, piece, move):
-        pass
+    def make_move(self, piece, move, color):
+        if self.try_move(piece, move, color):
+            self.game_board[move[1]][move[0]] = color
+            self.game_board[piece[0]][piece[1]] = '_'
+            return True
+        else:
+            print('Invalid, try again...')
+            return False
 
     # returns True if game is won
     def check_win(self):
@@ -144,22 +151,35 @@ class Checkers:
                 if element != 0 and color == None: color = element
                 elif color != None and color != element: return False
 
-    # only call this to run the game
+    # call this to start the game loop
     def run(self):
         while self.running:
             self.print_board()
             self.update_moves()
-            self.print_moves(self.player_color)
+            self.print_moves(self.current_turn)
             
-            pos = self.player.get_piece()
-            print(pos, ' selected.')
-            to_pos = self.player.get_move()
-            
-            valid = self.try_move(pos, to_pos, self.player_color)
-            if valid: self.make_move(pos, to_pos)
-            print('Moved ', pos, 'to', to_pos)
+            #white player turn
+            while self.current_turn == 'W':
+                valid_move = False
+                while not valid_move:
+                    pos = self.player1.get_piece()
+                    pos = (pos[1], pos[0])
+                    print(pos, ' selected.')
+                    to_pos = self.player1.get_move()
+                
+                    valid_move = self.make_move(pos, to_pos, self.player1.color)
+                
+                print('Moved ', pos, 'to', to_pos)
 
-            input('Press enter to end turn...')
+                input('Press enter to end turn...')
+                self.current_turn = 'B'
+
+            self.print_board()
+            self.update_moves()
+
+            # black player turn
+            while self.current_turn == 'B':
+                self.current_turn == 'W'
 
 
 
@@ -220,11 +240,11 @@ class CheckersAI(CheckersPlayer):
 
 def main():
     player1 = CheckersPlayer('Human', 'W')
-    checkers = Checkers(player1)
+    checkers = Checkers(player1, None)
     # need to pass the game to the AI so that it may access the game board and available moves
     checkers_ai = CheckersAI('Computer', 'B', checkers)
     # put the AI back into checkers
-    checkers.ai = checkers_ai
+    checkers.player2 = checkers_ai
 
     checkers.run()
     
