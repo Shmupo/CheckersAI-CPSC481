@@ -236,53 +236,6 @@ class CheckersAI(CheckersPlayer):
     # calculates the best move for a piece
     def generate_move(self):
         pass
-WHITE = (255,0,0)
-BLACK = (255,255,255)
-def minmax(position, depth, max_player, Checkers):
-   if depth == 0 or position.winner() != None:
-       return position.evaluate(), position
- 
-   if max_player:
-       maxEval = float('-inf')
-       best_move = None
-       for move in get_all_moves(position, WHITE, Checkers):
-           evaluation = minmax(move, depth-1, False, Checkers)[0]
-           maxEval = max(maxEval, evaluation)
-           if maxEval == evaluation:
-                   best_move = move
-       return maxEval, best_move
-   else:
-       minEval = float('+inf')
-       best_move = None
-       for move in get_all_moves(position, BLACK, Checkers):
-           evaluation = minmax(move, depth-1, True , Checkers)[0]
-           minEval = min(minEval, evaluation)
-           if minEval == evaluation:
-                   best_move = move
-       return minEval, best_move
- 
- 
-def simulate_move(piece, move, game_board, Checkers, skip):
-   game_board.move(piece, move[0], move[1])
-   if skip:
-       game_board.remove(skip)
- 
-   return game_board
- 
-def get_all_moves(game_board, color, Checkers):
-   moves = []
- 
-   for piece in game_board.get_all_pieces(color):
-       valid_moves = game_board.get_valid_moves(piece)
-       for move, skip in valid_moves.items():
-           temp_board = deepcopy(game_board)
-           temp_piece = temp_board.get_piece(piece.row, piece.col)
-           new_board = simulate_move(temp_piece, move, temp_board, Checkers, skip)
-           moves.append([new_board])
-       return moves
-
-
-
 
 
 def main():
@@ -294,10 +247,6 @@ def main():
     checkers.player2 = checkers_ai
 
     checkers.run()
-    
-    if CheckersAI.get_move == WHITE:
-        value, new_board = minmax(Checkers.get_board(), 3 ,WHITE, Checkers) 
-        Checkers.ai_move(new_board)
     
 
 if __name__ == '__main__':
