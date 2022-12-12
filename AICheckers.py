@@ -1,19 +1,23 @@
 # TODO
 # jumps, aka way to eliminate pieces
-# some move verification on the player side
-# executing moves
 # what to do when checkers piece reaches the end of the other side?
 # somehow allow piece to jump backwards to eliminate opponents
 # allow chaining of jumps
 # entire AI not done
-from copy import deepcopy
+
+# NOTE
+# a lot of the position indexes might be mixed up, i.e. (x, y) and (y, x) are both used
+
+
+from re import L
+
 
 class Checkers:
     game_board = [['_', 'B', '_', 'B', '_', 'B', '_', 'B'], #0
                   ['B', '_', 'B', '_', 'B', '_', 'B', '_'],#1
                   ['_', 'B', '_', 'B', '_', 'B', '_', 'B'], #2
                   ['_',  '_',  '_',  '_',  '_',  '_',  '_',  '_'], #3
-                  ['_',  '_',  '_',  '_',  '_',  '_',  '_',  '_'], #4
+                  ['_',  '_',  '_',  '_',  '_',  'B',  '_',  '_'], #4
                   ['W', '_', 'W', '_', 'W', '_', 'W', '_'], #5
                   ['_', 'W', '_', 'W', '_', 'W', '_', 'W'], #6
                   ['W', '_', 'W', '_', 'W', '_', 'W', '_']] #7
@@ -30,7 +34,7 @@ class Checkers:
 
     # pos : (y, x)
     # returns open position in direction
-    # if an opponent piece is in the space ahead, tries to return the spot over that opponent piece 
+    # if an opponent piece is in the space ahead, tries to return the spot over that opponent piece, but also returns the position of the piece jumped over
     def down_right(self, pos):
         if pos[0] < 7 and pos[1] < 7:
             if self.game_board[pos[0] + 1][pos[1] + 1] == '_':
@@ -38,7 +42,7 @@ class Checkers:
             elif self.game_board[pos[0] + 1][pos[1] + 1] != self.game_board[pos[0]][pos[1]]:
                 if pos[0] < 6 and pos[1] < 6:
                     if self.game_board[pos[0] + 2][pos[1] + 2] == '_':
-                        return (pos[1] + 2, pos[0] + 2)
+                        return (pos[1] + 2, pos[0] + 2, (pos[1] + 1, pos[0] + 1))
                 else: return None
         else: return None
 
@@ -49,7 +53,7 @@ class Checkers:
             elif self.game_board[pos[0] + 1][pos[1] - 1] != self.game_board[pos[0]][pos[1]]:
                 if pos[0] < 6 and pos[1] > 1:
                     if self.game_board[pos[0] + 2][pos[1] - 2] == '_':
-                        return (pos[1] - 2, pos[0] + 2)
+                        return (pos[1] - 2, pos[0] + 2, (pos[1] - 1, pos[0] + 1))
                 else: return None
         else: return None
 
@@ -60,7 +64,7 @@ class Checkers:
             elif self.game_board[pos[0] - 1][pos[1] + 1] != self.game_board[pos[0]][pos[1]]:
                 if pos[0] > 1 and pos[1] < 6:
                     if self.game_board[pos[0] - 2][pos[1] + 2] == '_':
-                        return (pos[1] + 2, pos[0] - 2)
+                        return (pos[1] + 2, pos[0] - 2, (pos[1] + 1, pos[0] - 1))
                 else: return None
         else: return None
 
@@ -71,7 +75,7 @@ class Checkers:
             elif self.game_board[pos[0] - 1][pos[1] - 1] != self.game_board[pos[0]][pos[1]]:
                 if pos[0] > 1 and pos[1] > 1:
                     if self.game_board[pos[0] - 2][pos[1] - 2] == '_':
-                        return (pos[0] - 2, pos[1] - 2, )
+                        return (pos[1] - 2, pos[0] - 2, (pos[1] - 1, pos[0] - 1))
                 else: return None
         else: return None
 
@@ -88,8 +92,14 @@ class Checkers:
         elif color == 'B': moves_list = self.black_moves
         print('Available moves : ')
         for x, y in moves_list.keys():
-            print('Piece : (', y, x, ')', end=' | ')
-            print('Moves : (', moves_list[(x, y)], moves_list[(x, y)], ')')
+            if moves_list[(x, y)] != []:
+                print('Piece : (', y, x, ')', end=' | ')
+                print('Moves :', end=' ')
+                for move in moves_list[(x, y)]:
+                    if len(move) == 3:
+                        print(move[:-1], end=' ')
+                    else: print(move, end=' ')
+                print()
 
     # returns the valid moves at a position (y, x)
     def moves_of_piece(self, pos):
@@ -110,7 +120,10 @@ class Checkers:
 
     # returns a list of the positions of pieces of a certain color that can move
     # color is either 'W' or 'B'
+    # resets the 2 move lists each time this is called
     def update_moves(self):
+        self.white_moves = {}
+        self.black_moves = {}
         for y, row in enumerate(self.game_board):
             for x, element in enumerate(row):
                 piece = (y, x)
@@ -118,19 +131,22 @@ class Checkers:
                     self.black_moves[piece] = self.moves_of_piece(piece)
                 elif element == 'W':
                     self.white_moves[piece] = self.moves_of_piece(piece)
-                elif element == '_':
-                    #if piece in self.white_moves: del self.white_moves[y, x]
-                    #if piece in self.black_moves: del self.black_moves[y, x]
-                    pass
 
     # return true if move is valid
+    # this is where pieces are 'captured' when jumped over
     def try_move(self, piece, move, color):
         if color == 'W' : move_list = self.white_moves
         elif color == 'B' : move_list = self.black_moves
 
         if piece in move_list:
-            if move in move_list[piece]: return True
-            else: return False
+            move_list = move_list[piece]
+        else: return False
+
+        for action in move_list:
+            if move == action[0:2]: 
+                if type(action[-1]) == tuple:
+                    self.game_board[action[-1][1]][action[-1][0]] = '_'
+                return True
         else: return False
 
     # executes a move
@@ -153,34 +169,34 @@ class Checkers:
 
     # call this to start the game loop
     def run(self):
+        # self.player1 starts first
+        player = self.player1
         while self.running:
+            print('Current Turn: ', player.color)
             self.print_board()
             self.update_moves()
-            self.print_moves(self.current_turn)
+            self.print_moves(player.color)
             
-            #white player turn
-            while self.current_turn == 'W':
+            making_turn = True
+
+            while making_turn == True:
                 valid_move = False
                 while not valid_move:
-                    pos = self.player1.get_piece()
+                    pos = player.get_piece()
                     pos = (pos[1], pos[0])
-                    print(pos, ' selected.')
-                    to_pos = self.player1.get_move()
+                    print(pos[1] ,',', pos[0], ' selected.')
+                    to_pos = player.get_move()
                 
-                    valid_move = self.make_move(pos, to_pos, self.player1.color)
+                    valid_move = self.make_move(pos, to_pos, player.color)
                 
-                print('Moved ', pos, 'to', to_pos)
+                print('Move ', pos, 'to', to_pos)
 
-                input('Press enter to end turn...')
-                self.current_turn = 'B'
-
-            self.print_board()
-            self.update_moves()
-
-            # black player turn
-            while self.current_turn == 'B':
-                self.current_turn == 'W'
-
+                # Ending turn
+                input('Press ENTER to end turn.')
+                if player == self.player1: player = self.player2
+                else: player = self.player1
+                making_turn = False
+                print()
 
 
 # mostly handles input from player
@@ -238,14 +254,12 @@ class CheckersAI(CheckersPlayer):
         pass
 
 
+# Currently there are 2 human players
 def main():
     player1 = CheckersPlayer('Human', 'W')
-    checkers = Checkers(player1, None)
-    # need to pass the game to the AI so that it may access the game board and available moves
-    checkers_ai = CheckersAI('Computer', 'B', checkers)
-    # put the AI back into checkers
-    checkers.player2 = checkers_ai
-
+    player2 = CheckersPlayer('Human2', 'B')
+    checkers = Checkers(player1, player2)
+    
     checkers.run()
     
 
