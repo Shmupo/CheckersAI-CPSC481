@@ -6,16 +6,16 @@
 # NOTE
 # a lot of the position indexes might be mixed up, i.e. (x, y) and (y, x) are both used
 
-
-from re import L
-
-
+# black_moves/white_moves consist of all the turns each piece can make.
+# Above objects are dictionaries with key being position of the piece (x, y) and the values being a list of moves (x, y)
+# NOTE : if the move has 3 values, that means the move is a JUMP and the third value is the position (x, y) of the spot jumped over.
+#        This 3rd value is used to remove the piece jumped over
 class Checkers:
     game_board = [['_', 'B', '_', 'B', '_', 'B', '_', 'B'], #0
                   ['B', '_', 'B', '_', 'B', '_', 'B', '_'],#1
                   ['_', 'B', '_', 'B', '_', 'B', '_', 'B'], #2
                   ['_',  '_',  '_',  '_',  '_',  '_',  '_',  '_'], #3
-                  ['_',  '_',  '_',  '_',  '_',  'B',  '_',  '_'], #4
+                  ['_',  '_',  '_',  '_',  '_',  '_',  '_',  '_'], #4
                   ['W', '_', 'W', '_', 'W', '_', 'W', '_'], #5
                   ['_', 'W', '_', 'W', '_', 'W', '_', 'W'], #6
                   ['W', '_', 'W', '_', 'W', '_', 'W', '_']] #7
@@ -30,13 +30,15 @@ class Checkers:
         self.player2 = player2
         self.current_turn = 'W'
 
-    # pos : (y, x)
+    # These apply to all direction methods below
+    # pos : (y, x) aka (row, column)
     # returns open position in direction
-    # if an opponent piece is in the space ahead, tries to return the spot over that opponent piece, but also returns the position of the piece jumped over
+    # if an opponent piece is in the space ahead, tries to return the spot over that opponent piece, but also returns the position of the piece jumped over as a 3rd parameter
     def down_right(self, pos):
         if pos[0] < 7 and pos[1] < 7:
             if self.game_board[pos[0] + 1][pos[1] + 1] == '_':
                 return (pos[1] + 1, pos[0] + 1)
+            # checking if piece to jump over is not a teammate
             elif self.game_board[pos[0] + 1][pos[1] + 1] != self.game_board[pos[0]][pos[1]]:
                 if pos[0] < 6 and pos[1] < 6:
                     if self.game_board[pos[0] + 2][pos[1] + 2] == '_':
@@ -85,6 +87,7 @@ class Checkers:
             print()
         print('----------------')
 
+    # displays the moves of the player with the specified color
     def print_moves(self, color):
         if color == 'W': moves_list = self.white_moves
         elif color == 'B': moves_list = self.black_moves
@@ -99,7 +102,8 @@ class Checkers:
                     else: print(move, end=' ')
                 print()
 
-    # returns the valid moves at a position (y, x)
+    # returns the valid moves of a piece at position (y, x) aka (row, col)
+    # will need to modify this when a king piece is implemented
     def moves_of_piece(self, pos):
         moves = []
         if self.game_board[pos[0]][pos[1]] == 'B':
@@ -148,6 +152,7 @@ class Checkers:
         else: return False
 
     # executes a move
+    # calls try_move() to make sure it is a valid move
     def make_move(self, piece, move, color):
         if self.try_move(piece, move, color):
             self.game_board[move[1]][move[0]] = color
@@ -177,6 +182,7 @@ class Checkers:
             
             making_turn = True
 
+            # Executing a turn
             while making_turn == True:
                 valid_move = False
                 while not valid_move:
@@ -197,7 +203,8 @@ class Checkers:
                 print()
 
 
-# mostly handles input from player
+# human player that requires inputs to be made to make moves
+# prompts the human player to enter positions of the game board in the for of (x, y) aka (col, row)
 class CheckersPlayer:
     def __init__(self, player_name, color):
         self.name = player_name
@@ -214,7 +221,7 @@ class CheckersPlayer:
             except:
                 print('Invalid input, try again.')
 
-    # prompt player to select square to move to
+    # prompt player to select square to move to, after selecting a piece
     def get_move(self):
         while True:
             pos = input('Enter the position, x,y of a square to move to : ')
@@ -225,7 +232,9 @@ class CheckersPlayer:
             except:
                 print('Invalid input, try again.')
 
-
+# AI player
+# get_move and get_piece HAVE to have these names and HAVE to be used.
+#       They should return in the format of (x, y) aka (col, row)
 class CheckersAI(CheckersPlayer):
     def __init__(self, name, color, checkers):
         super().__init__(name, color)
@@ -260,6 +269,5 @@ def main():
     
     checkers.run()
     
-
 if __name__ == '__main__':
     main()
