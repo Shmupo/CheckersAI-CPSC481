@@ -1,9 +1,7 @@
 # TODO
-# jumps, aka way to eliminate pieces
-# what to do when checkers piece reaches the end of the other side?
-# somehow allow piece to jump backwards to eliminate opponents
+# implement king piece
 # allow chaining of jumps
-# entire AI not done
+# AI player
 
 # NOTE
 # a lot of the position indexes might be mixed up, i.e. (x, y) and (y, x) are both used
