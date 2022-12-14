@@ -1,6 +1,5 @@
 # TODO
 # implement king piece
-# allow chaining of jumps
 # AI player
 
 # NOTE
@@ -10,6 +9,9 @@
 # Above objects are dictionaries with key being position of the piece (x, y) and the values being a list of moves (x, y)
 # NOTE : if the move has 3 values, that means the move is a JUMP and the third value is the position (x, y) of the spot jumped over.
 #        This 3rd value is used to remove the piece jumped over
+from itertools import chain
+
+
 class Checkers:
     game_board = [['_', 'B', '_', 'B', '_', 'B', '_', 'B'], #0
                   ['B', '_', 'B', '_', 'B', '_', 'B', '_'],#1
@@ -19,6 +21,16 @@ class Checkers:
                   ['W', '_', 'W', '_', 'W', '_', 'W', '_'], #5
                   ['_', 'W', '_', 'W', '_', 'W', '_', 'W'], #6
                   ['W', '_', 'W', '_', 'W', '_', 'W', '_']] #7
+
+    #this game board is for testing moves
+    #game_board = [['_',  '_',  '_',  '_',  '_',  '_',  '_',  '_'], #0
+    #              ['_',  '_',  '_',  '_',  '_',  '_',  '_',  '_'],#1
+    #              ['_',  '_',  '_',  '_',  '_',  '_',  '_',  '_'], #2
+    #              ['_',  '_',  '_',  '_',  '_',  '_',  '_',  '_'], #3
+    #              ['_',  '_',  '_',  '_',  'B',  '_',  '_',  '_'], #4
+    #              ['_',  '_',  '_',  '_',  '_',  '_',  '_',  '_'], #5
+    #              ['_',  '_',  'B',  '_',  '_',  '_',  '_',  '_'], #6
+    #              ['_',  'W',  '_',  '_',  '_',  '_',  '_',  '_']] #7
 
     def __init__(self, player, player2):
         self.turn = 'B'
@@ -162,13 +174,55 @@ class Checkers:
             print('Invalid, try again...')
             return False
 
-    # returns True if game is won
+    # returns False if game is won
     def check_win(self):
-        color = None
-        for row in self.game.board:
-            for element in row:
-                if element != 0 and color == None: color = element
-                elif color != None and color != element: return False
+        if len(self.white_moves) == 0: return 'B'
+        elif len(self.black_moves) == 0: return 'W'
+        else: return None
+
+    # checking for chain jumps and promping player to select a jump or skip turn
+    # runs its own input-checking loop
+    def can_jump_again(self, piece, player):
+        if player.color == 'W' : moves = self.white_moves[piece]
+        elif player.color == 'B' : moves = self.black_moves[piece]
+        
+        while True:
+            jumps = []
+
+            for action in moves:
+                if type(action[-1]) == tuple:
+                    jumps.append(action[0:2])
+
+            if len(jumps) != 0:
+                self.print_board()
+
+                print(piece[1] ,',', piece[0], ' selected, there is a jump available.')
+                print('Jumps : ', jumps)
+                user_in = input('Enter a square to jump to, or enter X to end turn : ')
+
+                if user_in == 'X':
+                    return False
+
+                self.make_move(piece, (int(user_in[0]), int(user_in[-1])), player.color)
+
+                self.update_moves()
+            else: return False
+
+    # return true if move was a jump
+    def is_move_jump(self, piece, move, color):
+        if color == 'W' : move_list = self.white_moves
+        elif color == 'B' : move_list = self.black_moves
+
+        if piece in move_list:
+            move_list = move_list[piece]
+        else: return False
+
+        for action in move_list:
+            if move == action[0:2]: 
+                if type(action[-1]) == tuple:
+                    return True
+                return False
+        else: return False
 
     # call this to start the game loop
     def run(self):
@@ -190,8 +244,19 @@ class Checkers:
                     pos = (pos[1], pos[0])
                     print(pos[1] ,',', pos[0], ' selected.')
                     to_pos = player.get_move()
-                
+                    
                     valid_move = self.make_move(pos, to_pos, player.color)
+                    
+                    # chain jumps
+                    if valid_move:
+                        # if previous move was a jump, allow chain jumps
+                        if self.is_move_jump(pos, to_pos, player.color): chain_jumping = True
+                        else: chain_jumping = False
+
+                        while chain_jumping:
+                            self.update_moves()
+                            # pass the position of to_pos since make_move() is called before this
+                            chain_jumping = self.can_jump_again((to_pos[1], to_pos[0]), player)
                 
                 print('Move ', pos, 'to', to_pos)
 
@@ -200,6 +265,13 @@ class Checkers:
                 if player == self.player1: player = self.player2
                 else: player = self.player1
                 making_turn = False
+                winner = self.check_win()
+
+                # checking win conditions after every turn end
+                if winner != None:
+                    print(winner, ' wins!')
+                    self.running = False
+
                 print()
 
 
