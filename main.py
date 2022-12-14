@@ -19,13 +19,12 @@ class Checkers:
                   ['_', 'W', '_', 'W', '_', 'W', '_', 'W'], #6
                   ['W', '_', 'W', '_', 'W', '_', 'W', '_']] #7
 
-    def __init__(self, player, player2):
+    def __init__(self, player):
         # stores all of the current moves of each piece on the board
         self.white_moves = {}
         self.black_moves = {}
         self.running = True
         self.player1 = player
-        self.player2 = player2
         self.current_turn = 'W'
 
     # pos : (y, x)
@@ -131,6 +130,7 @@ class Checkers:
 
     # return true if move is valid
     def try_move(self, piece, move, color):
+        move_list = {}
         if color == 'W' : move_list = self.white_moves
         elif color == 'B' : move_list = self.black_moves
 
@@ -152,12 +152,56 @@ class Checkers:
     # returns True if game is won
     def check_win(self):
         color = None
-        for row in self.game.board:
+        for row in self.game_board:
             for element in row:
                 if element != 0 and color == None: 
                     color = element
                 elif color != None and color != element: 
                     return False
+    
+    def get_piece(self,row,col):
+        return self.game_board[row][col]
+    def can_jump_again(self, piece, player):
+        if player.color == 'W' : moves = self.white_moves[piece]
+        elif player.color == 'B' : moves = self.black_moves[piece]
+        
+        while True:
+            jumps = []
+
+            for action in moves:
+                if type(action[-1]) == tuple:
+                    jumps.append(action[0:2])
+
+            if len(jumps) != 0:
+                self.print_board()
+
+                print(piece[1] ,',', piece[0], ' selected, there is a jump available.')
+                print('Jumps : ', jumps)
+                user_in = input('Enter a square to jump to, or enter X to end turn : ')
+
+                if user_in == 'X':
+                    return False
+
+                self.make_move(piece, (int(user_in[0]), int(user_in[-1])), player.color)
+
+                self.update_moves()
+            else: return False
+
+    # return true if move was a jump
+    def is_move_jump(self, piece, move, color):
+        if color == 'W' : move_list = self.white_moves
+        elif color == 'B' : move_list = self.black_moves
+
+        if piece in move_list:
+            move_list = move_list[piece]
+        else: return False
+
+        for action in move_list:
+            if move == action[0:2]: 
+                if type(action[-1]) == tuple:
+                    return True
+                return False
+        else: return False
 
     # call this to start the game loop
 
@@ -195,78 +239,11 @@ class CheckersPlayer:
                 print('Invalid input, try again.')
 
 
-class CheckersAI():
-    def minmax(self, board, depth, max_player,checkers): # sees what the best move is to make
-        if depth == 0:
-            return checkers.check_win(), board
-        
-        if max_player:
-            alpha = float('-inf')
-            for move in self.getAllMoves(board,"B",checkers):
-                val = self.minmax(move, depth-1, False, board)[0]
-                alpha = max(alpha, val)
-                if alpha == beta:
-                        best_move = val
-            return alpha, best_move
-        else: 
-            beta = float('+inf')
-            for move in self.getAllMoves(board,"W",checkers):
-                val = self.minmax(move, depth-1, True , board)[0]
-                beta = min(beta, val)
-                if beta == val:
-                        best_move = val
-            return beta,best_move
-    # self.white_moves = {currPosition : [[moveOne],[moveTwo]]}
-    
-    def get_move(self, pos,piece, board,checkers):
-        checkers.move([pos[1]][pos[0]])
-        board[piece[0]][piece[1]] = '_'
-        return board
-    
-
-    def getAllMoves(self,board,color,checkers):
-        moves = []
-        checkPieces = None
-        currValidMoves = None
-        checkPieces = self.get_color_moves(color,board,checkers)
-        
-        for currPos, possibleMoves in checkPieces.items():
-            currValidMoves = possibleMoves
-            for i in currValidMoves:
-                temp_board = deepcopy(board)
-                temp_piece = temp_board.get_piece(currPos[0],currPos[1])
-                new_board = self.get_move(temp_piece,i,temp_board,checkers)
-                moves.append([new_board,currPos])
-        return moves
-
-    
-    def moves_of_piece(self, pos,board,color,checkers):
-        moves = []
-        if board[pos[0]][pos[1]] == color:
-            DR = checkers.down_right(pos)
-            DL = checkers.down_left(pos)
-            if DR != None: 
-                moves.append(DR)
-            if DL != None: 
-                moves.append(DL)
-        return moves
-
-    # returns a list of the positions of pieces of a certain color that can move
-    # color is either 'W' or 'B'
-    def get_color_moves(self,color,board,checkers):
-        movesHash = {}
-        for y, row in enumerate(board):
-            for x, element in enumerate(row):
-                piece = (y, x)
-                if element == color:
-                    movesHash[piece] = self.moves_of_piece(piece,board,color,checkers)
-        return movesHash
-
+import extrafile
 
 def main():
     player1 = CheckersPlayer('Human', 'W')
-    player2 = CheckersAI()
-    checkers = Checkers(player1, player2)
+    checkers = Checkers(player1)
     while checkers.running:
         checkers.print_board()
         checkers.update_moves()
@@ -287,11 +264,11 @@ def main():
         
         print("This is the AI possible moves : ")
         checkers.print_moves("B")
-        value, bestMove = checkers.player2.minmax(checkers.game_board,3,True,Checkers)
-        checkers.game_board = bestMove
-        print(f"The best position the AI could make is moving from position{pos} over to position{to_pos}")
+        value, checkers.game_board = extrafile.min_max(checkers.game_board,3,True,checkers)
         checkers.current_turn = "W"
         
 
 if __name__ == '__main__':
     main()
+    #hello
+
