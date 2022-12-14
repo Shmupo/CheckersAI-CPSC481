@@ -69,3 +69,4 @@ def get_all_pieces(board, color):
                 valid_moves[piece] = board.moves_of_piece(piece)
     print(valid_moves)
     return valid_moves
+#h
