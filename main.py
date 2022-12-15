@@ -130,7 +130,7 @@ class Checkers:
 
     # return true if move is valid
     def try_move(self, piece, move, color):
-        move_list = {}
+        move_list = []
         if color == 'W' : move_list = self.white_moves
         elif color == 'B' : move_list = self.black_moves
 
@@ -263,12 +263,14 @@ def main():
             input('Press enter to end turn...')
         
         print("This is the AI possible moves : ")
+        checkers.print_board()
         checkers.print_moves("B")
-        value, checkers.game_board = extrafile.min_max(checkers.game_board,3,True,checkers)
+        value, checkers.game_board = extrafile.minmax_alpha_beta(checkers.game_board,3,False,checkers)
+        checkers.update_moves()
+        checkers.print_moves(checkers.current_turn)
         checkers.current_turn = "W"
         
 
 if __name__ == '__main__':
     main()
     #hello
-
