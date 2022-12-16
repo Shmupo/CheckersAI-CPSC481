@@ -261,12 +261,11 @@ def main():
                 valid_move = checkers.make_move(pos, to_pos, checkers.player1.color)
             print('Moved ', pos, 'to', to_pos)
             input('Press enter to end turn...')
-        
         print("This is the AI possible moves : ")
+        checkers.update_moves()
         checkers.print_board()
         checkers.print_moves("B")
-        value, checkers.game_board = extrafile.minmax_alpha_beta(checkers.game_board,3,False,checkers)
-        checkers.update_moves()
+        checkers.current_turn = extrafile.minmax_alpha_beta(checkers.game_board,3,False,checkers)
         checkers.print_moves(checkers.current_turn)
         checkers.current_turn = "W"
         
