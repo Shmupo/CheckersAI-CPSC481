@@ -1,6 +1,41 @@
+#==============================================
+# Filename: checker_minimax.py
+#==============================================
+# Filetype: Python Source File
+#==============================================
+# Author(s):
+#               Angaar Hamid
+#               Andrew Doan
+#               Alejandro Ramos
+#==============================================
+# Last Modified: 12/15/2022
+#==============================================
+# Description:
+# This file is responsible for displaying the
+# iterations of the minimax algorithm and 
+# performing the minimax algorithm.
+#==============================================
+
 from copy import deepcopy
 from constants import RED, WHITE
 import pygame
+
+#==============================================
+# Function Name: minimax
+#==============================================
+# Description: minimax tree used by the A.I.
+# to decide upon the best move to make.
+# Calculates a value for each move and chooses
+# the highest one to return.
+#==============================================
+# Input: Position of a piece, depth of how far
+# in the tree to compute, max_player is to flag
+# whether the current caller is a max_player,
+# and game is the game this algorithm is 
+# running in
+#==============================================
+# Output: The highest score and the move to make
+#==============================================
 
 def minimax(position, depth, max_player, game):
     if depth == 0 or position.winner() != None:
@@ -27,6 +62,21 @@ def minimax(position, depth, max_player, game):
         
         return minEval, best_move
 
+#==============================================
+# Function Name: simulate_move
+#==============================================
+# Description: makes a specified move onto the
+# board and returns the board after the move
+# was made
+#==============================================
+# Input: Piece to move, Move to make, Board
+# to use, Game this is running in, and the move
+# to not store into the current board being 
+# displayed
+#==============================================
+# Output: The modified board after a move
+# was made
+#==============================================
 
 def simulate_move(piece, move, board, game, skip):
     board.move(piece, move[0], move[1])
@@ -35,6 +85,19 @@ def simulate_move(piece, move, board, game, skip):
 
     return board
 
+#==============================================
+# Function Name: get_all_moves
+#==============================================
+# Description: Retrieves all the valid moves
+# from all the pieces of a certain color
+# currently on the board
+#==============================================
+# Input: Board to scan, Color of pieces to pick,
+# and the game this is running in.
+#==============================================
+# Output: A list of all moves available from
+# each piece
+#==============================================
 
 def get_all_moves(board, color, game):
     moves = []
@@ -50,6 +113,17 @@ def get_all_moves(board, color, game):
     
     return moves
 
+#==============================================
+# Function Name: draw_moves
+#==============================================
+# Description: draws the pieces onto the board
+# to be displayed
+#==============================================
+# Input: Game this is running in, board to
+# draw on, and piece to move
+#==============================================
+# Output: None
+#==============================================
 
 def draw_moves(game, board, piece):
     valid_moves = board.get_valid_moves(piece)
