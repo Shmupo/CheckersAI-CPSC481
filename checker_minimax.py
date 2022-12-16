@@ -57,5 +57,4 @@ def draw_moves(game, board, piece):
     pygame.draw.circle(game.win, (0,255,0), (piece.x_position, piece.y_position), 50, 5)
     game.draw_valid_moves(valid_moves.keys())
     pygame.display.update()
-    pygame.time.delay(100)
 
