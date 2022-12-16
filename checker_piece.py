@@ -27,7 +27,7 @@ class CheckerPiece:
         self.color_of_piece = color_of_piece
         self.x_position = 0
         self.y_position = 0
-        self.king = False
+        self.is_king = False
         self.get_pos()
 
     def get_pos(self):
@@ -35,7 +35,7 @@ class CheckerPiece:
         self.x_position = (size * self.column_position) + size // 2
 
     def make_king(self):
-        self.king = True
+        self.is_king = True
 
     def move(self, row_pos, column_pos):
         self.row_position = row_pos
