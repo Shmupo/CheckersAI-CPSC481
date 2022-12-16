@@ -22,12 +22,32 @@ from constants import NUM_OF_ROWS, NUM_OF_COLUMNS
 from constants import CELL_SIZE as size
 from constants import RED, BLACK, WHITE
 
+#==============================================
+# Class Name: Board
+#==============================================
+# Description: Stores all of the pieces of
+# the checkers board and handles modifications
+# to this board.
+#==============================================
+
 class Board:
     def __init__(self):
         self.board = []
         self.red_left = self.white_left = 12
         self.red_kings = self.white_kings = 0
         self.create_board()
+
+#==============================================
+# Function Name: get_all_pieces
+#==============================================
+# Description: Returns all the positions of
+# the pieces of a specified color
+#==============================================
+# Input: Color of piece to retrieve
+#==============================================
+# Output: List of positions of all the pieces
+# of a specified color
+#==============================================
 
     def get_all_pieces(self, color):
         pieces = []
@@ -36,6 +56,17 @@ class Board:
                 if piece != 0 and piece.color_of_piece == color:
                     pieces.append(piece)
         return pieces
+
+#==============================================
+# Function Name: move
+#==============================================
+# Description: Executes a move on the board
+#==============================================
+# Input: Position of piece to move, row and col
+# to move to
+#==============================================
+# Output: None
+#==============================================
 
     def move(self, piece, row, col):
         col_pos = piece.column_position
@@ -50,6 +81,17 @@ class Board:
             elif piece.color_of_piece == RED:
                 self.red_kings += 1 
         
+#==============================================
+# Function Name: draw
+#==============================================
+# Description: Displays the current board
+# onto the window
+#==============================================
+# Input: The window to display to
+#==============================================
+# Output: None
+#==============================================
+
     def draw(self, window):
         self.draw_squares(window)
         for row in range(NUM_OF_ROWS):
@@ -57,6 +99,17 @@ class Board:
                 piece = self.board[row][col]
                 if piece != 0:
                     piece.draw(window)
+
+#==============================================
+# Function Name: remove
+#==============================================
+# Description: Removes a piece from the board
+# when a piece is captured by the opponent
+#==============================================
+# Input: Position of piece to remove from play
+#==============================================
+# Output: None
+#==============================================
 
     def remove(self, pieces):
         for piece in pieces:
@@ -66,6 +119,18 @@ class Board:
                     self.red_left -= 1
                 elif piece.color_of_piece == WHITE:
                     self.white_left -= 1
+
+#==============================================
+# Function Name: create_board
+#==============================================
+# Description: Generates the initial state of
+# the checkerboard, with all pieces in their
+# starting positions
+#==============================================
+# Input: None
+#==============================================
+# Output: None
+#==============================================
 
     def create_board(self):
         for row in range(NUM_OF_ROWS):
@@ -83,6 +148,20 @@ class Board:
                 
                 else:
                     self.board[row].append(0)
+
+#==============================================
+# Function Name: traverse left
+#==============================================
+# Description: Moves the specified piece to
+# the left diagonal position
+#==============================================
+# Input: Start position, stop position, Step
+# to make, Color of the piece, Left is the
+# position to the left, Passed is a list of
+# pieces hopped over
+#==============================================
+# Output: The moves made by the piece
+#==============================================
 
     def traverse_left(self, start, stop, step, color, left, passed=[]):
         moves = {}
@@ -120,6 +199,18 @@ class Board:
         
         return moves
 
+#==============================================
+# Function Name: get_valid_moves
+#==============================================
+# Description: Obtains a list of the moves 
+# that can be made by a specified piece
+#==============================================
+# Input: Position of piece to get moves from
+#==============================================
+# Output: List of moves that can be made by
+# a specified piece
+#==============================================
+
     def get_valid_moves(self, piece):
         moves = {}
         left = piece.column_position - 1
@@ -137,6 +228,18 @@ class Board:
     
         return moves
 
+#==============================================
+# Function Name: winner
+#==============================================
+# Description: Checks whether either side has
+# any pieces left
+#==============================================
+# Input: None
+#==============================================
+# Output: Color of the side who has no more
+# pieces in play
+#==============================================
+
     def winner(self):
         if self.red_left <= 0:
             return WHITE
@@ -144,6 +247,18 @@ class Board:
             return RED
         
         return None 
+
+#==============================================
+# Function Name: get_piece
+#==============================================
+# Description: Get the element of the
+# specified row and column on the board
+#==============================================
+# Input: Row position and column position
+# of a piece
+#==============================================
+# Output: The element stored at the row, col
+#==============================================
 
     def get_piece(self, row, col):
         return self.board[row][col]
@@ -186,8 +301,31 @@ class Board:
         
         return valid_moves
 
+#==============================================
+# Function Name: evaluate
+#==============================================
+# Description: Estimates an objective value for
+# the current board
+#==============================================
+# Input: None
+#==============================================
+# Output: A value for how good the board is
+# for the current A.I.
+#==============================================
+
     def evaluate(self):
         return self.white_left - self.red_left + (self.white_kings * 0.5 - self.red_kings * 0.5)
+
+#==============================================
+# Function Name: draw_squares
+#==============================================
+# Description: Draws each individual square
+# of the checkers board
+#==============================================
+# Input: Window to draw onto
+#==============================================
+# Output: None
+#==============================================
 
     def draw_squares(self, win):
         win.fill(WHITE)
