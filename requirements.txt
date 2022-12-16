@@ -1,0 +1,7 @@
+Modules needed:
+
+pyGame:
+  py -m pip install pygame
+  
+ copy:
+  Built-in python module. No need to download.
