@@ -148,7 +148,7 @@ class Board:
     def get_piece(self, row, col):
         return self.board[row][col]
 
-    def _traverse_right(self, start, stop, step, color, right, passed=[]):
+    def traverse_right(self, start, stop, step, color, right, passed=[]):
         valid_moves = {}
         last = []
         
