@@ -1,36 +1,31 @@
-# TODO
-# implement king piece
-# AI player
-
-# NOTE
-# a lot of the position indexes might be mixed up, i.e. (x, y) and (y, x) are both used
-
+# INFO
 # black_moves/white_moves consist of all the turns each piece can make.
 # Above objects are dictionaries with key being position of the piece (x, y) and the values being a list of moves (x, y)
-# NOTE : if the move has 3 values, that means the move is a JUMP and the third value is the position (x, y) of the spot jumped over.
-#        This 3rd value is used to remove the piece jumped over
-from itertools import chain
+# When reaching the end of the board, WHITE is promoted to KING using 'K', BLACK is promoted to QUEEN using 'Q'
 
+# NOTE : If the move has 3 values, that means the move is a JUMP and the third value is the position (x, y) of the spot jumped over.
+#        This 3rd value is used to remove the piece jumped over
+#        A lot of the position indexes might be mixed up, i.e. (x, y) and (y, x) are both used
 
 class Checkers:
-    game_board = [['_', 'B', '_', 'B', '_', 'B', '_', 'B'], #0
-                  ['B', '_', 'B', '_', 'B', '_', 'B', '_'],#1
-                  ['_', 'B', '_', 'B', '_', 'B', '_', 'B'], #2
-                  ['_',  '_',  '_',  '_',  '_',  '_',  '_',  '_'], #3
-                  ['_',  '_',  '_',  '_',  '_',  '_',  '_',  '_'], #4
-                  ['W', '_', 'W', '_', 'W', '_', 'W', '_'], #5
-                  ['_', 'W', '_', 'W', '_', 'W', '_', 'W'], #6
-                  ['W', '_', 'W', '_', 'W', '_', 'W', '_']] #7
+    #game_board = [['_', 'B', '_', 'B', '_', 'B', '_', 'B'], #0
+    #              ['B', '_', 'B', '_', 'B', '_', 'B', '_'],#1
+    #              ['_', 'B', '_', 'B', '_', 'B', '_', 'B'], #2
+    #              ['_',  '_',  '_',  '_',  '_',  '_',  '_',  '_'], #3
+    #              ['_',  '_',  '_',  '_',  '_',  '_',  '_',  '_'], #4
+    #              ['W', '_', 'W', '_', 'W', '_', 'W', '_'], #5
+    #              ['_', 'W', '_', 'W', '_', 'W', '_', 'W'], #6
+    #              ['W', '_', 'W', '_', 'W', '_', 'W', '_']] #7
 
     #this game board is for testing moves
-    #game_board = [['_',  '_',  '_',  '_',  '_',  '_',  '_',  '_'], #0
-    #              ['_',  '_',  '_',  '_',  '_',  '_',  '_',  '_'],#1
-    #              ['_',  '_',  '_',  '_',  '_',  '_',  '_',  '_'], #2
-    #              ['_',  '_',  '_',  '_',  '_',  '_',  '_',  '_'], #3
-    #              ['_',  '_',  '_',  '_',  'B',  '_',  '_',  '_'], #4
-    #              ['_',  '_',  '_',  '_',  '_',  '_',  '_',  '_'], #5
-    #              ['_',  '_',  'B',  '_',  '_',  '_',  '_',  '_'], #6
-    #              ['_',  'W',  '_',  '_',  '_',  '_',  '_',  '_']] #7
+    game_board = [['_',  '_',  '_',  '_',  '_',  '_',  '_',  '_'], #0
+                  ['_',  '_',  '_',  'W',  '_',  '_',  '_',  '_'],#1
+                  ['_',  '_',  '_',  '_',  '_',  '_',  '_',  '_'], #2
+                  ['_',  '_',  '_',  '_',  '_',  '_',  '_',  '_'], #3
+                  ['_',  '_',  '_',  '_',  'B',  '_',  '_',  '_'], #4
+                  ['_',  '_',  '_',  '_',  '_',  '_',  '_',  '_'], #5
+                  ['_',  '_',  'B',  '_',  '_',  '_',  '_',  '_'], #6
+                  ['_',  'W',  '_',  '_',  '_',  '_',  '_',  '_']] #7
 
     def __init__(self, player, player2):
         self.turn = 'B'
@@ -130,7 +125,29 @@ class Checkers:
             if UR != None: moves.append(UR)
             if UL != None: moves.append(UL)
 
+        elif self.game_board[pos[0]][pos[1]] == 'K' or self.game_board[pos[0]][pos[1]] == 'Q':
+            UR = self.up_right(pos)
+            UL = self.up_left(pos)
+            DR = self.down_right(pos)
+            DL = self.down_left(pos)
+            if UR != None: moves.append(UR)
+            if UL != None: moves.append(UL)
+            if DR != None: moves.append(DR)
+            if DL != None: moves.append(DL)
+
         return moves
+
+    # checks if a piece has reached the other side, promoting it to a king or queen
+    # white is king, black is queen
+    def promote_pieces(self):
+        for y, row in enumerate(self.game_board):
+            for x, elem in enumerate(row):
+                if elem == 'W':
+                    if y == 0: 
+                        self.game_board[y][x] = 'K'
+                elif elem == 'B':
+                    if y == 7:
+                        self.game_board[y][x] = 'Q'
 
     # returns a list of the positions of pieces of a certain color that can move
     # color is either 'W' or 'B'
@@ -141,9 +158,9 @@ class Checkers:
         for y, row in enumerate(self.game_board):
             for x, element in enumerate(row):
                 piece = (y, x)
-                if element == 'B':
+                if element == 'B' or element == 'Q':
                     self.black_moves[piece] = self.moves_of_piece(piece)
-                elif element == 'W':
+                elif element == 'W' or element == 'K':
                     self.white_moves[piece] = self.moves_of_piece(piece)
 
     # return true if move is valid
@@ -261,13 +278,24 @@ class Checkers:
                 print('Move ', pos, 'to', to_pos)
 
                 # Ending turn
+                # Human Players
                 input('Press ENTER to end turn.')
-                if player == self.player1: player = self.player2
-                else: player = self.player1
-                making_turn = False
-                winner = self.check_win()
+                if type(self.player2) == CheckersPlayer: 
+                    if player == self.player1: player = self.player2
+                    else: player = self.player1
+                    making_turn = False
+
+                # AI Player
+                elif type(self.player2) == CheckersAI:
+                    AI_move = self.player2.get_move()
+                    self.make_move(AI_move)
+                    making_turn = False
+
+                # checking if pieces reach the other end of the board
+                self.promote_pieces()
 
                 # checking win conditions after every turn end
+                winner = self.check_win()
                 if winner != None:
                     print(winner, ' wins!')
                     self.running = False
@@ -305,8 +333,6 @@ class CheckersPlayer:
                 print('Invalid input, try again.')
 
 # AI player
-# get_move and get_piece HAVE to have these names and HAVE to be used.
-#       They should return in the format of (x, y) aka (col, row)
 class CheckersAI(CheckersPlayer):
     def __init__(self, name, color, checkers):
         super().__init__(name, color)
@@ -317,27 +343,15 @@ class CheckersAI(CheckersPlayer):
 
         self.action = None
 
-    # suggests the best move to make
     def get_move(self):
-        pass
-
-    def get_piece(self):
-        pass
-
-    # returns a value of how good a move is
-    def generate_tree(self):
-        pass
-
-    # calculates the best move for a piece
-    def generate_move(self):
-        pass
+        None
 
 
-# Currently there are 2 human players
 def main():
     player1 = CheckersPlayer('Human', 'W')
     player2 = CheckersPlayer('Human2', 'B')
     checkers = Checkers(player1, player2)
+    #checkers.player2 = CheckersAI('Computer', 'B', checkers)
     
     checkers.run()
     
