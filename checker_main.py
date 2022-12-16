@@ -1,4 +1,3 @@
-# Assets: https://techwithtim.net/wp-content/uploads/2020/09/assets.zip
 import pygame
 from constants import WIDTH, HEIGHT
 from constants import CELL_SIZE
